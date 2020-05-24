@@ -2,9 +2,5 @@
 
 # wasm-experiments
 ## Some webassembly experiments
-  
-<<<<<<< HEAD
 
-For rust/yew setup see https://yew.rs/docs/getting-started/project-setup/using-cargo-web
-=======
->>>>>>> 31ed848aeca9ff7a5e733cd4a2924b05e7e3d2bc
+> For rust/yew setup see https://yew.rs/docs/getting-started/project-setup/using-cargo-web
