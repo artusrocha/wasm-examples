@@ -1,14 +1,10 @@
-use yew::{html, Callback, ClickEvent, Component, ComponentLink, Html, ShouldRender, InputData};
+use yew::{html, Callback, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData};
 
 use serde_derive::{Deserialize, Serialize};
-//extern crate is_even;
-//use is_even::IsEven;
-
 
 pub struct ToDo {
     tasks: Vec<Task>,
     current: Task,
-    add: Callback<ClickEvent>,
     link: ComponentLink<Self>,
 }
 
@@ -35,7 +31,6 @@ impl Component for ToDo {
         ToDo {
             tasks: Vec::new(),
             current: current,
-            add: link.callback(|_| Msg::Add),
             link,
         }
     }
@@ -58,9 +53,8 @@ impl Component for ToDo {
     }
 
     fn view(&self) -> Html {
-//        let button_text = if self.counter > 0 { "add another row" } else { "add row" };
         html! {
-            <div>
+            <div id="container">
                 <div>{ "Task Manager" }</div>
                 <div>
                     { self.view_add_form() }
@@ -68,7 +62,15 @@ impl Component for ToDo {
                 </div>
             </div>
         }
-    }   
+    }
+
+    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+        // Should only return "true" if new properties are different to
+        // previously received properties.
+        // This component has no properties so we will always return "false".
+        false
+    }
+    
 }
 
 impl ToDo {
@@ -78,7 +80,7 @@ impl ToDo {
                 <input placeholder="Task description"
                     value=&self.current.description
                     oninput=self.link.callback(|e: InputData| Msg::SetCurrent(e.value) ) />
-                <button onclick=&self.add>{ "Add Task" }</button>
+                <button onclick=self.link.callback(|_: MouseEvent| Msg::Add ) >{ "Add Task" }</button>
             </div>
         }
     }
