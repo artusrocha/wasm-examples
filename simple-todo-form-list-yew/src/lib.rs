@@ -11,5 +11,11 @@ use crate::todo::ToDo;
 
 #[wasm_bindgen(start)]
 pub fn run_app() {
-    App::<ToDo>::new().mount_to_body();
+    yew::initialize();
+    let document = yew::utils::document();
+    let tags = document.get_elements_by_tag_name("Tag");
+//    App::<ToDo>::new().mount(tag.unwrap());
+    for i in 0..tags.length() {
+        App::<ToDo>::new().mount( tags.item(i).unwrap() ); //. .mount_to_body(); 
+    }
 }
