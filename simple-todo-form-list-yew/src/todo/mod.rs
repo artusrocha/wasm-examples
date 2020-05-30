@@ -12,12 +12,14 @@ pub struct ToDo {
 #[derive(Clone)]
 struct Task {
     description: String,
+    is_done: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub enum Msg {
     Add,
     SetCurrent(String),
+    ToggleIsDone(usize),
 }
 
 impl Component for ToDo {
@@ -27,6 +29,7 @@ impl Component for ToDo {
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         let current = Task {
             description: "".into(),
+            is_done: false,
         };
         ToDo {
             tasks: Vec::new(),
@@ -41,12 +44,18 @@ impl Component for ToDo {
                 self.tasks.push( self.current.clone() );
                 self.current = Task {
                     description: "".into(),
+                    is_done: false,
                 };
                 true // Indicate that the Component should re-render
             }
             Msg::SetCurrent(val) => {
                 println!("Input: {}", val);
                 self.current.description = val;
+                true
+            }
+            Msg::ToggleIsDone(index) => {
+                let mut task = self.tasks.get_mut(index).unwrap();
+                task.is_done = !task.is_done;
                 true
             }
         }
@@ -88,16 +97,29 @@ impl ToDo {
     fn view_tasks_list(&self) -> Html {
         html! {
             <ul>
-                { for self.tasks.iter().map(|e| self.view_task_row(e) ) }
+                { for self.tasks.iter().enumerate()
+                    .map(|(index, task)| self.view_task_row(index, &task) ) }
             </ul>
         }
     }
 
-    fn view_task_row(&self, task: &Task) -> Html {
+    fn view_task_row(&self, index: usize, task: &Task) -> Html {
         html! {
-            <li> { &task.description } </li>
+            <li>
+                <input placeholder="Is done?" name="is_done" type="checkbox"
+                    value=index
+                    checked=task.is_done
+                    oninput=self.link.callback(move |_: InputData| { Msg::ToggleIsDone(index) }) />
+                    // to force the closure to take ownership of `index` 
+                    // (and any other referenced variables), use the `move` keyword
+                { &task.description }
+            </li>
         }
     }
+
+//    fn toggle_is_done(&self, task: &Task) {
+//        task.is_done = !task.is_done;
+//    }
     
 }
 
