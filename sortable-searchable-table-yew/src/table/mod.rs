@@ -1,23 +1,25 @@
-use yew::{html, Callback, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData};
-use uuid::Uuid;
-use serde_derive::{Deserialize, Serialize};
-use rand::prelude::*;
+pub mod fetch;
 
+//use yew::{html, Callback, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData};
+use yew::{html, MouseEvent, Component, ComponentLink, Html, ShouldRender};
+use serde_derive::{Deserialize, Serialize};
+//use rand::prelude::*;
+//use uuid::Uuid;
+
+//use crate::table::fetch;
 
 pub struct Table {
     rows: Vec<Row>,
-    current: Row,
     link: ComponentLink<Self>,
 }
 
 
 #[derive(Clone)]
 struct Row {
+    sequence: usize,
+    natural: u64,
     integer: i64,
-//    float: f64,
-//    string: String,
-//    boolean: bool,
-//    uuid: Option<Uuid>,
+    char: char,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -31,19 +33,16 @@ impl Component for Table {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create( _: Self::Properties, link: ComponentLink<Self>) -> Self {
+
         let mut rows = Vec::new();
-        let current = Row {
-            integer: 1,//random::<i64>(),
-//            float: random::<f64>(),
-//            string: random::<char>().to_string(),
-//            boolean: random::<bool>(),
-//            uuid: Uuid::new_v4(),
-        };
-        rows.push(current.clone());
+        for n in 0..100 {
+            let new_row = Table::gen_random_row(n);
+            rows.push(new_row);
+        }
+
         Table {
             rows: rows,
-            current: current,
             link,
         }
     }
@@ -51,20 +50,13 @@ impl Component for Table {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Add => {
-                self.rows.push( self.current.clone() );
-                self.current = Row {
-            integer: 2,//random::<i64>(),
-//            float: random::<f64>(),
-//            string: random::<char>().to_string(),
-//            boolean: random::<bool>(),
-//            uuid: Uuid:: new_v4(),
-        };
+                self.rows.push( Table::gen_random_row( self.rows.len() ) );
                 true // Indicate that the Component should re-render
             }
-            Msg::SetCurrent(val) => {
+            Msg::SetCurrent(_val) => {
                 true
             }
-            Msg::ToggleIsDone(index) => {
+            Msg::ToggleIsDone(_index) => {
 //                let mut Row = self.rows.get_mut(index).unwrap();
 //                Row.is_done = !Row.is_done;
                 true
@@ -74,11 +66,13 @@ impl Component for Table {
 
     fn view(&self) -> Html {
         html! {
-            <div id="container">
-                <div>{ "Row Manager" }</div>
-                <div>
-                    { self.view_add_form() }
-                    { self.view_rows_list() }
+            <div id="main">
+                <div id="container">
+                    <div>{ "Row Manager" }</div>
+                    <div>
+                        { self.view_add_form() }
+                        { self.view_rows_list() }
+                    </div>
                 </div>
             </div>
         }
@@ -112,23 +106,39 @@ impl Table {
         }
     }
 
-    fn view_row(&self, index: usize, row: &Row) -> Html {
+    fn view_row(&self, _index: usize, row: &Row) -> Html {
         html! {
-            <li class="Row-row">
+            <li class="row">
+                <div class="col col-2">
+                    { &row.sequence}
+                </div>
                 <div class="col col-2">
                     { &row.integer}
                 </div>
                 <div class="col col-2">
-                    { "&row.string" }
+                    { &row.natural}
                 </div>
                 <div class="col col-2">
-                    { "&row.boolean" }
+                    
                 </div>
                 <div class="col col-2">
-                    { "&row.uuid" }
+                    
+                </div>
+                <div class="col col-2">
+                    { &row.char}
                 </div>
             </li>
         }
-    }    
+    }
+
+    fn gen_random_row(sequence: usize) -> Row {
+        Row {
+            sequence: sequence,
+            natural: rand::random::<u64>(),
+            integer: rand::random::<i64>(),
+            char: rand::random::<char>(),
+        }
+    }
+  
 }
 
