@@ -27,6 +27,7 @@ pub enum Msg {
     Add,
     SetCurrent(String),
     ToggleIsDone(usize),
+    SortBy(String),
 }
 
 impl Component for Table {
@@ -59,6 +60,10 @@ impl Component for Table {
             Msg::ToggleIsDone(_index) => {
 //                let mut Row = self.rows.get_mut(index).unwrap();
 //                Row.is_done = !Row.is_done;
+                true
+            }
+            Msg::SortBy(key) => {
+                self.sort_by(key);
                 true
             }
         }
@@ -99,38 +104,62 @@ impl Table {
 
     fn view_rows_list(&self) -> Html {
         html! {
-            <ul>
+            <table>
+                { self.view_tab_head() }
                 { for self.rows.iter().enumerate()
                     .map(|(index, row)| self.view_row(index, &row) ) }
-            </ul>
+            </table>
         }
     }
 
     fn view_row(&self, _index: usize, row: &Row) -> Html {
         html! {
-            <li class="row">
-                <div class="col col-2">
+            <tr class="row">
+                <td class="col">
                     { &row.sequence}
-                </div>
-                <div class="col col-2">
+                </td>
+                <td class="col">
                     { &row.integer}
-                </div>
-                <div class="col col-2">
+                </td>
+                <td class="col">
                     { &row.natural}
-                </div>
-                <div class="col col-2">
-                    
-                </div>
-                <div class="col col-2">
-                    
-                </div>
-                <div class="col col-2">
+                </td>
+                <td class="col">
                     { &row.char}
-                </div>
-            </li>
+                </td>
+            </tr>
         }
     }
 
+    fn view_tab_head(&self) -> Html {
+        html!{
+            <tr>
+                { self.view_tab_head_col( "seq".into() ) }
+                { self.view_tab_head_col( "integer".into() ) }
+                { self.view_tab_head_col( "natural".into() ) }
+                { self.view_tab_head_col( "char".into() ) }
+            </tr>
+        }
+    }
+
+    fn view_tab_head_col(&self, key: String) -> Html {
+        let key_cp = key.clone();
+        html!{
+            <th onclick=self.link.callback(move |_: MouseEvent| Msg::SortBy( key.clone() ) )>
+                    { key_cp } <i class="arrow down"></i>
+            </th>
+        }
+    }
+
+    fn sort_by(&mut self, key: String) {
+        match &key[..] {
+            "seq" => self.rows.sort_by_key(|row| row.sequence),
+            "integer" => self.rows.sort_by_key(|row| row.integer),
+            "natural" => self.rows.sort_by_key(|row| row.natural),
+            "char" => self.rows.sort_by_key(|row| row.char),
+            _ => self.rows.sort_by_key(|row| row.sequence),
+        };
+    }
     fn gen_random_row(sequence: usize) -> Row {
         Row {
             sequence: sequence,
