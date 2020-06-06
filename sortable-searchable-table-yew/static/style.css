@@ -4,19 +4,14 @@ body {
     margin:0;
 }
 #main{
-    width:1280px;
+    width:1600px;
     max-width:100%;
-    margin:0 auto;
+    margin:20px auto 0;
 }
 #container {
-    margin: 20px;
     padding: 20px;
     box-shadow: 1px 1px 2px 1px rgba(0,0,0,0.25);
     border-radius: 2px;
-}
-ul {
-    list-style: none;
-    padding: 0;
 }
 .row{
     background: transparent;
@@ -25,20 +20,11 @@ ul {
     background: #E8F2F6;
 }
 .col {
-    padding:0 5px;
+    padding:0 10px;
     text-align: right;
 }
 .col:nth-child(1) {
     text-align: center;
-}
-.col.col-1 {
-    width:8.3%;
-}
-.col.col-2 {
-    width: 16.6%;
-}
-.col.col-10 {
-    width: 83.3%;
 }
 
 th {
@@ -61,4 +47,10 @@ th:hover {
 .arrow.down {
   transform: rotate(45deg);
   -webkit-transform: rotate(45deg);
+}
+
+.search {
+  display: block;
+  width: 1px;
+  min-width: 100%;
 }

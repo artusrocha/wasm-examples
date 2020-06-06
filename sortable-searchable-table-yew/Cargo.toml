@@ -19,3 +19,5 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 rand = { version="0.7", features = ["wasm-bindgen"] }
 web-sys = { version = "^0.3.40", features = [ 'Document', 'Element', 'Window', 'HtmlCollection', 'Headers', 'Request', 'RequestInit', 'RequestMode', 'Response' ] }
 wasm-bindgen-futures = "0.4.13"
+base64 = "0.12.1"
+ordered-float = "1.0"
