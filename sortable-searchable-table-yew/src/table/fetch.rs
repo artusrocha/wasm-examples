@@ -1,4 +1,3 @@
-use serde::{Serialize, Deserialize};
 use web_sys::{Request, RequestInit, RequestMode, Response};
 use wasm_bindgen_futures::JsFuture;
 use wasm_bindgen::prelude::*;

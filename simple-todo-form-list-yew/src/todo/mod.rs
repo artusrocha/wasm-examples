@@ -1,4 +1,4 @@
-use yew::{html, Callback, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData};
+use yew::{html, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData};
 
 use serde_derive::{Deserialize, Serialize};
 
@@ -105,21 +105,23 @@ impl ToDo {
 
     fn view_task_row(&self, index: usize, task: &Task) -> Html {
         html! {
-            <li>
+            <li class="task-row">
+                <div class="col col-1">
                 <input placeholder="Is done?" name="is_done" type="checkbox"
                     value=index
                     checked=task.is_done
                     oninput=self.link.callback(move |_: InputData| { Msg::ToggleIsDone(index) }) />
                     // to force the closure to take ownership of `index` 
                     // (and any other referenced variables), use the `move` keyword
+                </div>
+                <div class="col col-10">
                 { &task.description }
+                </div>
+                <div class="col col-1">
+                { "123" }
+                </div>
             </li>
         }
-    }
-
-//    fn toggle_is_done(&self, task: &Task) {
-//        task.is_done = !task.is_done;
-//    }
-    
+    }    
 }
 

@@ -4,6 +4,8 @@ pub mod fetch;
 use yew::{html, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData, KeyboardEvent};
 use serde_derive::{Deserialize, Serialize};
 
+use regex::Regex;
+
 pub struct Table {
     rows: Vec<Row>,
     link: ComponentLink<Self>,
@@ -116,10 +118,20 @@ impl Table {
         html! {
             <table>
                 { self.view_tab_head() }
-                { for self.rows.iter().enumerate()
+                { for self.rows.iter()
+                    .filter(|row| self.do_filter(row))
+                    .enumerate()
                     .map(|(index, row)| self.view_row(index, &row) ) }
             </table>
         }
+    }
+
+    fn do_filter(&self, row: &Row) -> bool {
+        self.searchable_example.sequence
+            .and_then(|val| Some( val.to_string() ) )
+            .and_then(|val| Some( row.sequence.unwrap().to_string().contains(&val) ) )
+            .unwrap_or(true)
+        //true
     }
 
     fn view_row(&self, _index: usize, row: &Row) -> Html {
