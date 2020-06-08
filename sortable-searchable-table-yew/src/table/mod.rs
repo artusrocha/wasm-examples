@@ -4,13 +4,12 @@ pub mod fetch;
 use yew::{html, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData, KeyboardEvent};
 use serde_derive::{Deserialize, Serialize};
 
-use regex::Regex;
 
 pub struct Table {
     rows: Vec<Row>,
     link: ComponentLink<Self>,
     sort_by: String,
-    searchable_example: Row,
+    searchable_example: RowSearcheableExample,
 }
 
 
@@ -24,12 +23,23 @@ struct Row {
     string: Option<String>,
 }
 
+#[derive(Clone)]
+struct RowSearcheableExample {
+    sequence: Option<String>,
+    natural: Option<String>,
+    integer: Option<String>,
+    float: Option<String>,
+    char: Option<String>,
+    string: Option<String>,
+}
+
+
 #[derive(Serialize, Deserialize)]
 pub enum Msg {
     Add,
     SortBy(String),
     Search(String, String),
-    Filter(String),
+    Filter,
     Nope,
 }
 
@@ -49,7 +59,7 @@ impl Component for Table {
             rows: rows,
             link,
             sort_by: "seq".into(),
-            searchable_example: Row {
+            searchable_example: RowSearcheableExample {
                 sequence: None,
                 natural: None,
                 integer: None,
@@ -74,7 +84,7 @@ impl Component for Table {
                 self.search(key, query);
                 false
             }
-            Msg::Filter(key) => {
+            Msg::Filter => {
                 true
             }
             Msg::Nope => { false }
@@ -127,11 +137,18 @@ impl Table {
     }
 
     fn do_filter(&self, row: &Row) -> bool {
-        self.searchable_example.sequence
-            .and_then(|val| Some( val.to_string() ) )
-            .and_then(|val| Some( row.sequence.unwrap().to_string().contains(&val) ) )
-            .unwrap_or(true)
-        //true
+        Table::filter_field( self.searchable_example.sequence.as_deref(), row.sequence.unwrap().to_string() )
+        && Table::filter_field( self.searchable_example.integer.as_deref(), row.integer.unwrap().to_string() )
+        && Table::filter_field( self.searchable_example.natural.as_deref(), row.natural.unwrap().to_string() )
+        && Table::filter_field( self.searchable_example.float.as_deref(), row.float.unwrap().to_string() )
+        && Table::filter_field( self.searchable_example.char.as_deref(), row.char.unwrap().to_string() )
+        && Table::filter_field( self.searchable_example.string.as_deref(), row.string.as_ref().unwrap().clone() )
+    }
+
+    fn filter_field(example: Option<&str>, field_str_val: String) -> bool {
+        example 
+            .and_then(|val| Some( field_str_val.contains(val)) ) 
+            .unwrap_or(true) 
     }
 
     fn view_row(&self, _index: usize, row: &Row) -> Html {
@@ -186,12 +203,11 @@ impl Table {
     }
 
     fn view_search_form(&self, key: String) -> Html {
-        let key_cp = key.clone();
         html! {
             <input placeholder="filter" class="search"
                 oninput=self.link.callback(move |q: InputData| Msg::Search(key.clone(), q.value) ) 
                 onkeypress=self.link.callback(move |k: KeyboardEvent| 
-                    if k.key() == "Enter" { Msg::Filter(key_cp.clone()) }
+                    if k.key() == "Enter" { Msg::Filter }
                     else { Msg::Nope } ) >
             </input>
         }
@@ -216,12 +232,12 @@ impl Table {
 
     fn search(&mut self, key: String, query: String) {
         match &key[..] {
-            "seq" => self.searchable_example.sequence = Some( query.parse::<usize>().unwrap() ),
-            "integer" => self.searchable_example.integer = Some( query.parse::<i64>().unwrap() ),
-            "natural" => self.searchable_example.natural = Some( query.parse::<u64>().unwrap() ),
-            "float" => self.searchable_example.float = Some( query.parse::<f64>().unwrap() ),
-            "char" => self.searchable_example.char = Some( query.parse::<char>().unwrap() ),
-            "string" => self.searchable_example.string = Some( query ),
+            "seq" => self.searchable_example.sequence = if query.is_empty() { None } else { Some(query) },
+            "integer" => self.searchable_example.integer = if query.is_empty() { None } else { Some(query) },
+            "natural" => self.searchable_example.natural = if query.is_empty() { None } else { Some(query) },
+            "float" => self.searchable_example.float = if query.is_empty() { None } else { Some(query) },
+            "char" => self.searchable_example.char = if query.is_empty() { None } else { Some(query) },
+            "string" => self.searchable_example.string = if query.is_empty() { None } else { Some(query) },
             _ => { },
         }
     }
