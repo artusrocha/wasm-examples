@@ -1,5 +1,5 @@
 [package]
-name = "simple-todo-form-list-yew"
+name = "table-rows-manager-yew"
 version = "0.1.0"
 authors = ["Artus Rocha <artusrocha@gmail.com>"]
 edition = "2018"

@@ -1,8 +1,12 @@
+
 pub mod fetch;
 
 //use yew::{html, Callback, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData};
 use yew::{html, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData, KeyboardEvent};
 use serde_derive::{Deserialize, Serialize};
+
+use rand::{random, thread_rng, Rng};
+use rand::distributions::Alphanumeric;
 
 
 pub struct Table {
@@ -95,9 +99,7 @@ impl Component for Table {
         html! {
             <div id="main">
                 <div id="container">
-                    <div>{ "Row Manager" }</div>
                     <div>
-                        { self.view_add_form() }
                         { self.view_rows_list() }
                     </div>
                 </div>
@@ -152,28 +154,32 @@ impl Table {
     }
 
     fn view_row(&self, _index: usize, row: &Row) -> Html {
-        let string = &row.string.clone().unwrap();
         html! {
             <tr class="row">
-                <td class="col">
-                    { &row.sequence.unwrap() }
-                </td>
-                <td class="col">
-                    { &row.integer.unwrap() }
-                </td>
-                <td class="col">
-                    { &row.natural.unwrap() }
-                </td>
-                <td class="col">
-                    { &row.float.unwrap() }
-                </td>
-                <td class="col">
-                    { &row.char.unwrap() }
-                </td>
-                 <td class="col">
-                    { &string.clone() }
-                </td>
+                { self.view_col(0, &row.sequence.unwrap().to_string() ) }
+                { self.view_col(1, &row.integer.unwrap().to_string()  ) }
+                { self.view_col(2, &row.natural.unwrap().to_string()  ) }
+                { self.view_col(3, &row.float.unwrap().to_string()    ) }
+                { self.view_col(3, &row.char.unwrap().to_string()    ) }
+                { self.view_col(4, &row.string.clone().unwrap()       ) }
+                { self.view_control_col() }
             </tr>
+        }
+    }
+
+    fn view_col(&self, _n: usize, val: &String) -> Html {
+        html!{
+            <td class="col">
+                    { val }
+            </td>
+        }
+    }
+
+    fn view_control_col(&self) -> Html {
+        html!{
+            <td class="col control">
+                <i class="fa fa-trash"></i>
+            </td>
         }
     }
 
@@ -186,6 +192,7 @@ impl Table {
                 { self.view_tab_head_col( "float".into()   ) }
                 { self.view_tab_head_col( "char".into()    ) }
                 { self.view_tab_head_col( "string".into()  ) }
+                <th class="col control"><br/><i class="fa fa-search"></i></th>
             </tr>
         }
     }
@@ -224,7 +231,7 @@ impl Table {
                 "float" => self.rows.sort_by_cached_key(|row| ordered_float::OrderedFloat(row.float.unwrap()) ),
                 "char" => self.rows.sort_by_cached_key(|row| row.char),
                 "string" => self.rows.sort_by_cached_key(|row| row.string.clone()),
-                _ => self.rows.sort_by_key(|row| row.sequence),
+                _ => { },
             };
         }
         self.sort_by = key;
@@ -245,12 +252,20 @@ impl Table {
     fn gen_random_row(sequence: usize) -> Row {
         Row {
             sequence: Some( sequence ),
-            natural: Some( rand::random::<u64>() ),
-            integer: Some( rand::random::<i64>() ),
-            float: Some( rand::random::<f64>() ),
-            char: Some( rand::random::<char>() ),
-            string: Some( base64::encode( format!("{}",rand::random::<i64>()) ) ),
+            natural: Some( random::<u64>() ),
+            integer: Some( random::<i64>() ),
+            float: Some( random::<f64>() ),
+            char: Some( Table::gen_random_string(1).pop().unwrap() ),
+            string: Some( Table::gen_random_string(20) ),
+            
         }
+    }
+
+    fn gen_random_string(n: usize) -> String {
+        thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(n)
+            .collect()
     }
   
 }
