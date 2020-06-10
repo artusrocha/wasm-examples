@@ -41,6 +41,7 @@ struct RowSearcheableExample {
 #[derive(Serialize, Deserialize)]
 pub enum Msg {
     Add,
+    Remove(usize),
     SortBy(String),
     Search(String, String),
     Filter,
@@ -80,6 +81,10 @@ impl Component for Table {
                 self.rows.push( Table::gen_random_row( self.rows.len() ) );
                 true // Indicate that the Component should re-render
             }
+            Msg::Remove(seq) => {
+                self.rows.remove(seq);
+                true // Indicate that the Component should re-render
+            }
             Msg::SortBy(key) => {
                 self.sort_by(key);
                 true
@@ -117,15 +122,6 @@ impl Component for Table {
 }
 
 impl Table {
-    fn view_add_form(&self) -> Html{
-        html! {
-            <div>
-                <input placeholder="Row description" />
-                <button onclick=self.link.callback(|_: MouseEvent| Msg::Add ) >{ "Add Row" }</button>
-            </div>
-        }
-    }
-
     fn view_rows_list(&self) -> Html {
         html! {
             <table>
@@ -153,16 +149,16 @@ impl Table {
             .unwrap_or(true) 
     }
 
-    fn view_row(&self, _index: usize, row: &Row) -> Html {
+    fn view_row(&self, index: usize, row: &Row) -> Html {
         html! {
             <tr class="row">
                 { self.view_col(0, &row.sequence.unwrap().to_string() ) }
                 { self.view_col(1, &row.integer.unwrap().to_string()  ) }
                 { self.view_col(2, &row.natural.unwrap().to_string()  ) }
                 { self.view_col(3, &row.float.unwrap().to_string()    ) }
-                { self.view_col(3, &row.char.unwrap().to_string()    ) }
+                { self.view_col(3, &row.char.unwrap().to_string()     ) }
                 { self.view_col(4, &row.string.clone().unwrap()       ) }
-                { self.view_control_col() }
+                { self.view_control_col( index ) }
             </tr>
         }
     }
@@ -175,10 +171,12 @@ impl Table {
         }
     }
 
-    fn view_control_col(&self) -> Html {
-        html!{
+    fn view_control_col(&self, seq: usize) -> Html {
+        html! {
             <td class="col control">
-                <i class="fa fa-trash"></i>
+                <i class="fa fa-trash"
+                    onclick=self.link.callback(move |_: MouseEvent| Msg::Remove(seq) ) >
+                </i>
             </td>
         }
     }
