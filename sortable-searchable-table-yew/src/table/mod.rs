@@ -1,4 +1,3 @@
-
 pub mod fetch;
 
 //use yew::{html, Callback, MouseEvent, Component, ComponentLink, Html, ShouldRender, InputData};
@@ -14,6 +13,7 @@ pub struct Table {
     link: ComponentLink<Self>,
     sort_by: String,
     searchable_example: RowSearcheableExample,
+    selected_all: bool,
 }
 
 
@@ -25,6 +25,7 @@ struct Row {
     float: Option<f64>,
     char: Option<char>,
     string: Option<String>,
+    selected: bool,
 }
 
 #[derive(Clone)]
@@ -42,6 +43,8 @@ struct RowSearcheableExample {
 pub enum Msg {
     Add,
     Remove(usize),
+    ToggleSelect(usize),
+    ToggleSelectAll,
     SortBy(String),
     Search(String, String),
     Filter,
@@ -71,7 +74,8 @@ impl Component for Table {
                 float: None,
                 char: None,
                 string: None,
-            }
+            },
+            selected_all: false,
         }
     }
 
@@ -81,9 +85,22 @@ impl Component for Table {
                 self.rows.push( Table::gen_random_row( self.rows.len() ) );
                 true // Indicate that the Component should re-render
             }
-            Msg::Remove(seq) => {
-                self.rows.remove(seq);
+            Msg::Remove(index) => {
+                self.rows.remove(index);
                 true // Indicate that the Component should re-render
+            }
+            Msg::ToggleSelect(index) => {
+                self.rows.get_mut(index).and_then(|row| {
+                    row.selected = !row.selected;
+                    Some(row)} );
+                false
+            }
+            Msg::ToggleSelectAll => {
+                self.selected_all = !self.selected_all;
+                for row in self.rows.iter_mut() {
+                    row.selected = self.selected_all;
+                }
+                true
             }
             Msg::SortBy(key) => {
                 self.sort_by(key);
@@ -102,14 +119,10 @@ impl Component for Table {
 
     fn view(&self) -> Html {
         html! {
-            <div id="main">
-                <div id="container">
                     <div>
                         { self.view_rows_list() }
                     </div>
-                </div>
-            </div>
-        }
+         }
     }
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
@@ -150,8 +163,10 @@ impl Table {
     }
 
     fn view_row(&self, index: usize, row: &Row) -> Html {
+        let i = index.clone();
         html! {
             <tr class="row">
+                { self.view_row_select( i, row ) }
                 { self.view_col(0, &row.sequence.unwrap().to_string() ) }
                 { self.view_col(1, &row.integer.unwrap().to_string()  ) }
                 { self.view_col(2, &row.natural.unwrap().to_string()  ) }
@@ -163,6 +178,17 @@ impl Table {
         }
     }
 
+    fn view_row_select(&self, index: usize, row: &Row) -> Html {
+        html! {
+            <td class="col">
+                <input type="checkbox"
+                    checked=row.selected
+                    onclick=self.link.callback(move |_: MouseEvent| Msg::ToggleSelect(index) )>
+                </input>
+            </td>
+        }
+    }
+
     fn view_col(&self, _n: usize, val: &String) -> Html {
         html!{
             <td class="col">
@@ -171,11 +197,11 @@ impl Table {
         }
     }
 
-    fn view_control_col(&self, seq: usize) -> Html {
+    fn view_control_col(&self, index: usize) -> Html {
         html! {
             <td class="col control">
                 <i class="fa fa-trash"
-                    onclick=self.link.callback(move |_: MouseEvent| Msg::Remove(seq) ) >
+                    onclick=self.link.callback(move |_: MouseEvent| Msg::Remove(index) ) >
                 </i>
             </td>
         }
@@ -184,6 +210,12 @@ impl Table {
     fn view_tab_head(&self) -> Html {
         html!{
             <tr>
+                <th class="col select">
+                    <input type="checkbox"
+                        checked=self.selected_all
+                        onclick=self.link.callback(move |_: MouseEvent| Msg::ToggleSelectAll )>
+                    </input>
+                </th>
                 { self.view_tab_head_col( "seq".into()     ) }
                 { self.view_tab_head_col( "integer".into() ) }
                 { self.view_tab_head_col( "natural".into() ) }
@@ -255,7 +287,7 @@ impl Table {
             float: Some( random::<f64>() ),
             char: Some( Table::gen_random_string(1).pop().unwrap() ),
             string: Some( Table::gen_random_string(20) ),
-            
+            selected: false,
         }
     }
 
