@@ -1,0 +1,24 @@
+[package]
+name = "table-rows-manager-yew"
+version = "0.1.0"
+authors = ["Artus Rocha <artusrocha@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+yew = { version = "0.16.2" }
+# yew = { version = "0.14.3", features = ["std_web"] }
+serde = "1"
+serde_derive = "1"
+wasm-bindgen = "^0.2"
+uuid = { version = "0.8", features = ["serde", "v4"] }
+rand = { version="0.7", features = ["wasm-bindgen"] }
+web-sys = { version = "^0.3.40", features = [ 'Document', 'Element', 'Window', 'HtmlCollection', 'Headers', 'Request', 'RequestInit', 'RequestMode', 'Response' ] }
+wasm-bindgen-futures = "0.4.13"
+base64 = "0.12.1"
+ordered-float = "1.0"
+regex = "1"
